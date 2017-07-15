@@ -13,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -33,8 +34,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
  *
  * @author Dato
  */
-@Path("/file")
-@Consumes(MediaType.APPLICATION_JSON)
+@Path("/")
+//@Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class APIService {
     
@@ -43,8 +44,8 @@ public class APIService {
     }
     
     @GET
-    @Produces(MediaType.TEXT_HTML)
     public Response callGetMethod(@QueryParam("url") String serviceURL, @QueryParam("memType") String memType){
+        System.out.println("call API GET method ...");
         Client client = ClientBuilder.newClient();
         WebTarget webTarget = client.target(serviceURL);
         Response res = webTarget.request(memType).get();
@@ -93,13 +94,26 @@ public class APIService {
     }
     
     @POST
+    @Path("/visUpload")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response visUpload(){
+        System.out.println("call visUpload...");
+        return Response.status(200).entity("mushaobs...").build();
+    }
+    
+    @POST
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_PLAIN)
     public Response uploadFile(
             @FormDataParam("file") InputStream uploadedInputStream,
-            @FormDataParam("file") FormDataContentDisposition fileDetail) {
+            @FormDataParam("file") FormDataContentDisposition fileDetail,
+            @FormDataParam("mainTopic") String mainTopic,
+            @FormDataParam("priority") int priority) {
 
+            String params = String.format("%s %d", mainTopic, priority);
+            System.out.println(params);
+        
             String uploadedFileLocation = "/home/dato/Desktop/" + fileDetail.getFileName();
 
             // save it
