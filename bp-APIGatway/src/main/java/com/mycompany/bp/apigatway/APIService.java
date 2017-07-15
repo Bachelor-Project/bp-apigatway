@@ -102,10 +102,10 @@ public class APIService {
     }
     
     @POST
-    @Path("/upload")
+    @Path("/uploadTopic")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response uploadFile(
+    public Response uploadTopic(
             @FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail,
             @FormDataParam("mainTopic") String mainTopic,
@@ -121,7 +121,7 @@ public class APIService {
 
             String output = "File uploaded to : " + uploadedFileLocation;
 
-            return Response.status(200).entity(output).build();
+            return Response.status(200).entity("Upload Success").build();
 
     }
 
@@ -147,4 +147,12 @@ public class APIService {
             }
 
     }
+    
+    @POST
+    @Path("/uploadTask")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response uploadTask(){
+        return Response.status(200).entity("Upload Success").build();
+    } 
 }
