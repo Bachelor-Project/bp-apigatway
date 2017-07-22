@@ -13,7 +13,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -27,8 +28,13 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.media.multipart.MultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 
 /**
  *
@@ -117,12 +123,40 @@ public class APIService {
             String uploadedFileLocation = "/home/dato/Desktop/" + fileDetail.getFileName();
 
             // save it
-            writeToFile(uploadedInputStream, uploadedFileLocation);
+//            writeToFile(uploadedInputStream, uploadedFileLocation);
 
             String output = "File uploaded to : " + uploadedFileLocation;
-
+            
+            
+            Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
+            WebTarget t = client.target("http://localhost:8080/files_data/api/uploadTopic");
+            
+            File file = convertStreamToFile(uploadedInputStream);
+            System.out.println("file: " + file.getAbsolutePath());
+            
+            FileDataBodyPart filePart = new FileDataBodyPart("file", file);
+            
+            MultiPart multipartEntity = new FormDataMultiPart()
+                    .field("mainTopic", "1223", MediaType.TEXT_PLAIN_TYPE)
+                    .field("priority", "10", MediaType.TEXT_PLAIN_TYPE)
+                    .bodyPart(filePart);
+            t.request().post(Entity.entity(multipartEntity, multipartEntity.getMediaType()));
+            
             return Response.status(200).entity("Upload Success").build();
 
+    }
+    
+    private File convertStreamToFile(InputStream in){
+        File file = null;
+        try {
+            file = File.createTempFile("stream2file", ".pdf");
+            file.deleteOnExit();
+            FileOutputStream out = new FileOutputStream(file);
+            IOUtils.copy(in, out);
+        } catch (IOException ex) {
+            Logger.getLogger(APIService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return file;
     }
 
     // save uploaded file to new location
